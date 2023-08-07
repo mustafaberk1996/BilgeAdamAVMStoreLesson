@@ -46,4 +46,10 @@ class MainViewModel:ViewModel() {
         }
     }
 
+    fun storeAdded(index: Int) {
+        viewModelScope.launch {
+            _adapterState.emit(AdapterState.Added(index))
+        }
+    }
+
 }

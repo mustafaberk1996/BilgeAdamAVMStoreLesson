@@ -15,6 +15,7 @@ import com.example.avmstorelesson.data.state.StoreListState
 import com.example.avmstorelesson.databinding.ActivityMainBinding
 import com.example.avmstorelesson.showAlert
 import com.example.avmstorelesson.ui.adapter.StoreAdapter
+import com.example.avmstorelesson.ui.storeAdd.StoreAddActivity
 import com.example.avmstorelesson.ui.storeDetail.StoreDetailActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collect
@@ -38,6 +39,11 @@ class MainActivity : AppCompatActivity() {
         observeStoreListState()
         observeAdapterState()
 
+        binding.btnAddStore.setOnClickListener {
+            val intent = Intent(this, StoreAddActivity::class.java)
+            startActivityForResult(intent, STORE_ADD_REQUEST_CODE)
+        }
+
 
     }
 
@@ -48,6 +54,9 @@ class MainActivity : AppCompatActivity() {
                     when(it){
                         is AdapterState.Removed->{
                             adapter?.notifyItemRemoved(it.index)
+                        }
+                        is AdapterState.Added->{
+                            adapter?.notifyItemInserted(it.index)
                         }
                         else-> {
 
@@ -71,8 +80,9 @@ class MainActivity : AppCompatActivity() {
     companion object{
         const val STORE_KEY = "store"
         const val STORE_INDEX_KEY = "store_index"
+        const val ADDED_STORE_INDEX_KEY = "added_store_index_key"
         const val STORE_DELETE_REQUEST_CODE = 1
-        const val STORE_UPDATE_REQUEST_CODE = 2
+        const val STORE_ADD_REQUEST_CODE = 2
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -88,9 +98,15 @@ class MainActivity : AppCompatActivity() {
             }else{
                 viewModel.deleteStore(index!!)
             }
-//            data?.getParcelableExtra<Store>(STORE_KEY)?.let {
-//                viewModel.deleteStore(it)
-//            }
+        }
+
+        if (requestCode == STORE_ADD_REQUEST_CODE && resultCode == RESULT_OK){
+            data?.getIntExtra(ADDED_STORE_INDEX_KEY,-1)?.let {
+                if (it!=-1){
+                    viewModel.storeAdded(it)
+                }
+            }
+
         }
     }
 
